@@ -5,6 +5,7 @@ import { GetStaticPaths, GetStaticProps } from "next"
 import { stripe } from "../../lib/stripe"
 import Stripe from 'stripe'
 import { useState } from "react"
+import Head from "next/head"
 
 interface ProdutoProps{
   produto:{
@@ -36,22 +37,27 @@ export default function Produtos({produto }:ProdutoProps ){
     }
   }
   return (
-    <ProdutoContainer>
-      <ImagemContainer>
-        <Image src={produto.urlImagem} width={520} height={480} alt=""/>
-      </ImagemContainer>
-      <DetalhesProduto>
-          <h1>{produto.nome}</h1>
-          <span>{produto.preco}</span>
-          <p>{produto.descricao}</p>
+    <>
+      <Head>
+        <title>{produto.nome} | Ignite Shop</title>
+      </Head>
+      <ProdutoContainer>
+        <ImagemContainer>
+          <Image src={produto.urlImagem} width={520} height={480} alt=""/>
+        </ImagemContainer>
+        <DetalhesProduto>
+            <h1>{produto.nome}</h1>
+            <span>{produto.preco}</span>
+            <p>{produto.descricao}</p>
 
-          <button
-            onClick={acaoComprarProduto} 
-            disabled={criarSessaoCheckout}>
-            Comprar agora
-          </button>
-        </DetalhesProduto>
-    </ProdutoContainer>
+            <button
+              onClick={acaoComprarProduto} 
+              disabled={criarSessaoCheckout}>
+              Comprar agora
+            </button>
+          </DetalhesProduto>
+      </ProdutoContainer>
+    </>
   )
 
 }
@@ -70,7 +76,7 @@ export const getStaticProps : GetStaticProps<any,{ id: string}> = async ({ param
   })
 
   
-    const preco = produto.default_price as Stripe.Price
+  const preco = produto.default_price as Stripe.Price
 
   return{
     props:{
