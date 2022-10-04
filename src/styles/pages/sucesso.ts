@@ -34,15 +34,24 @@ export const SucessoContainer = styled('main',{
   }
 
 })
-export const ImagemContainer = styled('div',{
-  marginTop: '4rem',
-  width: '100%',
-  maxWidth:130,
-  height: 145,
-  background: 'linear-gradient(180deg,#1ea483 0%, #7465d4 100%)',
-  borderRadius: 8,
-  padding: '0.25rem',
+export const ImagensContainer = styled('section',{
+  display:'flex',
+  alignItems:'center',
+  marginBottom: '3rem',
+  'div+div':{
+    marginLeft: 'calc(-140px / 2)',
+  }
 
+})
+export const ImagemContainer = styled('div',{
+  
+  width: 140,
+  height: 140,
+  background: 'linear-gradient(180deg,#1ea483 0%, #7465d4 100%)',
+  boxShadow:'0px 0px 60px rgba(0,0,0,0.8)',
+  borderRadius: '50%',
+  
+  position: 'relative',
   display: 'flex',
   alignItems:'center',
   justifyContent:'center',

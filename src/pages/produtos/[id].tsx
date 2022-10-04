@@ -1,41 +1,29 @@
 import Image from "next/future/image"
-import axios from "axios"
 import { DetalhesProduto, ImagemContainer, ProdutoContainer } from "../../styles/pages/produto"
 import { GetStaticPaths, GetStaticProps } from "next"
 import { stripe } from "../../lib/stripe"
 import Stripe from 'stripe'
-import { useState } from "react"
+
 import Head from "next/head"
+import { useCart } from "../../hooks/UseCart"
+import { useRouter } from "next/router"
+import { IProduct } from "../../contexts/CartContext"
 
 interface ProdutoProps{
-  produto:{
-    id: string,
-    nome: string,
-    urlImagem:string,
-    preco:string,
-    descricao: string,
-    precoId: string
-  }
+  produto:IProduct;
 }
 
 export default function Produtos({produto }:ProdutoProps ){
-  const [criarSessaoCheckout,setCriarSessaoCheckout] = useState(false)
-  async function acaoComprarProduto(){
-    try{
-      setCriarSessaoCheckout(true)
-      const response = await axios.post('/api/checkout',{
-        precoId : produto.precoId
-      })
-      const {checkoutUrl} = response.data
+  const {isFallback} = useRouter();
 
-      window.location.href = checkoutUrl
+  const {checkIfItemAlreadyExists, addToCart} = useCart();
 
-    }catch(err){
-      //Conectar com ferramenta de observalidade
-      setCriarSessaoCheckout(false)
-      alert('Falha ao redirecionar ao checkout')
-    }
+  if(isFallback){
+    return <p>Loading ....</p> 
   }
+
+  const itemAlreadyInCart = checkIfItemAlreadyExists(produto.id)
+
   return (
     <>
       <Head>
@@ -51,9 +39,9 @@ export default function Produtos({produto }:ProdutoProps ){
             <p>{produto.descricao}</p>
 
             <button
-              onClick={acaoComprarProduto} 
-              disabled={criarSessaoCheckout}>
-              Comprar agora
+              onClick={() => addToCart(produto)} 
+              disabled={itemAlreadyInCart}>
+              {itemAlreadyInCart ?'Produto já está no carrinho' :  'Colocar na sacola'}
             </button>
           </DetalhesProduto>
       </ProdutoContainer>
@@ -90,6 +78,7 @@ export const getStaticProps : GetStaticProps<any,{ id: string}> = async ({ param
         }).format(preco.unit_amount / 100),
         descricao: produto.description,
         precoId: preco.id,
+        numberprice: preco.unit_amount / 100
       }
     },
     revalidate: 60 * 60 * 1 , //1 hora

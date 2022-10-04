@@ -1,52 +1,90 @@
 import Image from "next/future/image"
-import { HomeContainer, Product } from "../styles/pages/home"
+import { HomeContainer, Product, SliderContainer } from "../styles/pages/home"
+import useEmblaCarousel from 'embla-carousel-react'
 import { stripe } from "../lib/stripe"
 import { GetStaticProps } from "next"
-import {useKeenSlider} from "keen-slider/react"
-import "keen-slider/keen-slider.min.css"
+
+
 import Stripe from 'stripe'
-import Link from "next/link"
+
 import Head from "next/head"
+
+import { useCart } from "../hooks/UseCart"
+import { IProduct } from "../contexts/CartContext"
+import { MouseEvent, useEffect, useState } from "react"
+import { ProductSkeleton } from "../components/ProductSkeleton"
+import Link from "next/link"
+import { CartButton } from "../components/CartButton"
 
 
 interface HomeProps{
-  produtos:{
-    id:string,
-    nome: string,
-    urlImagem: string,
-    preco: string
-  }[]
+  produtos:IProduct[];
 }
 
 export default function Home({produtos }: HomeProps) {
-  const [sliderRef] = useKeenSlider({
-    slides:{
-      perView: 3,
-      spacing:48
-    }
+  const [isLoading,setIsLoading] = useState(true)
+  const [emblaRef] = useEmblaCarousel({
+    align:'start',
+    skipSnaps: false,
+    dragFree : true,
   })
+
+  useEffect(() => {
+    const timeOut = setTimeout(() => setIsLoading(false),2000)
+    
+    return () => clearTimeout(timeOut)
+  },[])
+  const {addToCart, checkIfItemAlreadyExists} = useCart();
+
+  function handleAddToCart(e: MouseEvent<HTMLButtonElement>, produto: IProduct){
+    e.preventDefault();
+    addToCart(produto);
+  }
 
   return (
     <>
       <Head>
         <title>Home | Ignite Shop</title>
       </Head>
-      <HomeContainer ref={sliderRef} className="keen-slider">
-        {produtos.map(produto => {
-          return (
-            <Link key={produto.id} href={`/produtos/${produto.id}`} prefetch={false}>
-              <Product className="keen-slider__slide">
-                <Image src={produto.urlImagem} width={520} height={480} alt="" />
-                <footer>
-                  <strong>{produto.nome}</strong>
-                  <span>{produto.preco}</span>
-                </footer>
-              </Product>
-            </Link>
-          )
-        })}
-        
-      </HomeContainer>
+      <div style={{overflow:'hidden', width:'100%'}}>
+        <HomeContainer>
+          <div className="embla" ref={emblaRef}>
+            <SliderContainer className="embla__container container">
+              {isLoading ?(
+                <>
+                  <ProductSkeleton className="embla__slide" />
+                  <ProductSkeleton className="embla__slide" />
+                  <ProductSkeleton className="embla__slide" />
+                </>
+              ): (
+                <>
+                  {produtos.map(produto => {
+                  return (
+                    <Link key={produto.id} href={`/produtos/${produto.id}`} prefetch={false}>
+                      <Product className="embla__slide">
+                        <Image src={produto.urlImagem} width={520} height={480} alt="" />
+                        <footer>
+                          <div>
+                            <strong>{produto.nome}</strong>
+                            <span>{produto.preco}</span>
+                          </div>
+                          <CartButton 
+                            color='green' 
+                            size='large'
+                            disabled={checkIfItemAlreadyExists(produto.id)}
+                            onClick={(e) => handleAddToCart(e,produto)}
+                          />
+                        </footer>
+                      </Product>
+                    </Link>
+                    )
+                  })}
+                </>
+              )}
+            </SliderContainer>
+          </div>
+        </HomeContainer>
+      </div>
     </>
   )
 }
@@ -65,6 +103,8 @@ export const getStaticProps: GetStaticProps  = async() =>{
         style: 'currency',
         currency: 'BRL'
       }).format(preco.unit_amount / 100),
+      numberPrice: preco.unit_amount/100,
+      defaultPriceId: preco.id
     }
   })
   return {

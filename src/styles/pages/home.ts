@@ -18,6 +18,8 @@ export const Product = styled('a',{
   display: 'flex',
   alignItems:'center',
   justifyContent:'center',
+  width: '100%',
+  minHeight:656,
   overflow: 'hidden',
 
   img:{
@@ -41,6 +43,12 @@ export const Product = styled('a',{
     opacity: 0,
     transition: 'all 0.2s ease-in-out',
 
+    div:{
+      display: 'flex',
+      flexDirection: 'column',
+      gap:4,
+    },
+
     strong:{
       fontSize:'$lg',
     },
@@ -48,7 +56,7 @@ export const Product = styled('a',{
       fontSize:'$xl',
       fontWeight:'bold',
       color: '$green300',
-    }
+    },
     
   },
 
@@ -57,5 +65,15 @@ export const Product = styled('a',{
       transform: 'translateY(0%)',
       opacity: 1,
     }
+  }
+})
+export const SliderContainer = styled('div',{
+  display: 'flex',
+  gap:"3rem",
+  margin: 'auto',
+
+  '.embla__slide':{
+    minWidth:'43.5rem',
+
   }
 })
